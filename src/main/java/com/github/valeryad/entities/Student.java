@@ -69,10 +69,8 @@ public class Student {
         }
     }
 
-    public void setSubjects(EnumSet<Subjects> subjects) {
-        for (Subjects subject : subjects) {
-            register.put(subject, new LinkedList<Integer>());
-        }
+    public void setSubject(Subjects subject) {
+        register.put(subject, new LinkedList<Integer>());
     }
 
     public EnumSet<Subjects> getSubjects() throws NoSubjectsExcetption {

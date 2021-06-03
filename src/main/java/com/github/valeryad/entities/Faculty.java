@@ -1,8 +1,8 @@
 package com.github.valeryad.entities;
 
+import com.github.valeryad.exceptions.NoGroupsInFacultyException;
 import com.github.valeryad.exceptions.NoStudentsInGroupException;
 import com.github.valeryad.exceptions.NoSubjectsExcetption;
-import com.github.valeryad.exceptions.NoGroupsInFacultyException;
 
 import java.util.*;
 
@@ -15,7 +15,6 @@ public class Faculty {
     public Faculty(String name) {
         this.name = name;
         groups = new HashSet<>();
-
     }
 
     public void addGroup(Group group) {
@@ -23,10 +22,9 @@ public class Faculty {
     }
 
     public Set<Group> getGroups() throws NoGroupsInFacultyException {
-        if(groups.size() == 0){
+        if (groups.size() == 0) {
             throw new NoGroupsInFacultyException("No groups assigned to faculty");
         }
-
         return groups;
     }
 
@@ -43,20 +41,23 @@ public class Faculty {
         return name;
     }
 
+    public void setSubject(Subjects subject) {
+        if (subjects == null) {
+            subjects = EnumSet.of(subject);
+        } else {
+            subjects.add(subject);
+        }
+    }
+
     public EnumSet<Subjects> getSubjects() throws NoSubjectsExcetption {
-        if(subjects == null){
+        if (subjects == null) {
             throw new NoSubjectsExcetption("No subjects assigned to faculty");
         }
         return subjects;
     }
 
     public boolean containsSubject(Subjects subject) {
-        for (Subjects tempSubject : subjects) {
-            if (tempSubject.equals(subject)) {
-                return true;
-            }
-        }
-        return false;
+        return subjects.contains(subject);
     }
 
     public List<Student> getAllStudents() {
@@ -69,5 +70,24 @@ public class Faculty {
             }
         }
         return students;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        Faculty faculty = (Faculty) o;
+        return name.equals(faculty.name);
+    }
+
+    @Override
+    public int hashCode(){
+        return name.hashCode();
+    }
+
+    @Override
+    public String toString(){
+        return name;
     }
 }

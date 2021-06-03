@@ -10,6 +10,7 @@ public class Group {
     private String name;
     private Set<Student> students;
 
+
     public Group(String name) {
         this.name = name;
         students = new HashSet<Student>();
@@ -53,5 +54,10 @@ public class Group {
     @Override
     public int hashCode() {
         return 31 * name.hashCode() + students.hashCode();
+    }
+
+    @Override
+    public String toString(){
+        return "Group \"" + name + "\"";
     }
 }
