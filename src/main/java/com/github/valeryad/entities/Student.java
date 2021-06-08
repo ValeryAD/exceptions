@@ -6,6 +6,8 @@ import com.github.valeryad.exceptions.NoSubjectsExcetption;
 import java.util.*;
 
 public class Student {
+    public static final int MIN_GRADE = 1;
+    public static final int MAX_GRADE = 10;
     private static int lastId = 0;
     private final int id;
     private String name;
@@ -54,34 +56,43 @@ public class Student {
     }
 
     public void giveGrade(Subjects subject, int grade) throws IncorrectGradeException {
-        if (grade <= 0 || grade > 10) {
-            throw new IncorrectGradeException(String.format("attempt to give incorrect grade: %d", grade));
+        if (grade < MIN_GRADE || grade > MAX_GRADE) {
+            throw new IncorrectGradeException(String.format("attempt to give incorrect grade: %d to student %s", grade, this));
         }
-
-        if (faculty.containsSubject(subject)) {
-            if (register.containsKey(subject)) {
-                register.get(subject).add(grade);
-            } else {
-                List<Integer> grades = new LinkedList<>();
-                grades.add(grade);
-                register.put(subject, grades);
-            }
+        if (register.containsKey(subject)) {
+            register.get(subject).add(grade);
+        } else {
+            List<Integer> grades = new LinkedList<>();
+            grades.add(grade);
+            register.put(subject, grades);
         }
     }
 
-    public void setSubject(Subjects subject) {
+    public void assignSubject(Subjects subject) {
         register.put(subject, new LinkedList<Integer>());
     }
 
-    public EnumSet<Subjects> getSubjects() throws NoSubjectsExcetption {
-        EnumSet<Subjects> assignedSubjects = EnumSet.copyOf(register.keySet());
+    public void assignSubjects(Collection<Subjects> subjects) {
+        for (Subjects subject : subjects) {
+            register.put(subject, new LinkedList<Integer>());
+        }
+    }
 
-        if (assignedSubjects.size() == 0) {
+    public List<Subjects> getSubjects() throws NoSubjectsExcetption {
+        if (register.isEmpty()) {
             throw new NoSubjectsExcetption(String.format("Student id:%d %s %s don't have any subject",
                     id, lastName, name));
         }
 
-        return EnumSet.copyOf(register.keySet());
+        return new ArrayList<Subjects>(register.keySet());
+    }
+
+    public List<Integer> getGradesOfSubject(Subjects subject){
+        if(register.containsKey(subject)){
+            return register.get(subject);
+        }else{
+            return new ArrayList<Integer>();
+        }
     }
 
     @Override

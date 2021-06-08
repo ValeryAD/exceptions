@@ -21,11 +21,11 @@ public class Faculty {
         groups.add(group);
     }
 
-    public Set<Group> getGroups() throws NoGroupsInFacultyException {
+    public List<Group> getGroups() throws NoGroupsInFacultyException {
         if (groups.size() == 0) {
             throw new NoGroupsInFacultyException("No groups assigned to faculty");
         }
-        return groups;
+        return new ArrayList<Group>(groups);
     }
 
     public void addStudent(Group group, Student student) {
@@ -41,7 +41,15 @@ public class Faculty {
         return name;
     }
 
-    public void setSubject(Subjects subject) {
+    public void assignSubjects(EnumSet<Subjects> subjects){
+        if(this.subjects == null){
+            this.subjects = EnumSet.copyOf(subjects);
+        }else{
+            this.subjects.addAll(subjects);
+        }
+    }
+
+    public void assignSubject(Subjects subject) {
         if (subjects == null) {
             subjects = EnumSet.of(subject);
         } else {
@@ -70,6 +78,11 @@ public class Faculty {
             }
         }
         return students;
+    }
+
+    public boolean containsGroup(Group group) {
+        System.out.println("hi");
+        return groups.contains(group);
     }
 
     @Override

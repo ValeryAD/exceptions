@@ -2,17 +2,17 @@ package com.github.valeryad.entities;
 
 import com.github.valeryad.exceptions.NoStudentsInGroupException;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Group {
     private String name;
+    private Faculty faculty;
     private Set<Student> students;
 
 
-    public Group(String name) {
+    public Group(String name, Faculty faculty) {
         this.name = name;
+        this.faculty = faculty;
         students = new HashSet<Student>();
     }
 
@@ -36,11 +36,11 @@ public class Group {
         return students.contains(student);
     }
 
-    public Set<Student> getStudents() throws NoStudentsInGroupException {
+    public List<Student> getStudents() throws NoStudentsInGroupException {
         if(students.size() == 0){
-            throw new NoStudentsInGroupException("Theres no students in group " + name);
+            throw new NoStudentsInGroupException(String.format("There's no students in group \"%s\" of %s", name, faculty));
         }
-        return students;
+        return new ArrayList<Student>(students);
     }
 
     @Override
@@ -48,12 +48,12 @@ public class Group {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Group group = (Group) o;
-        return name.equals(group.getName()) && students.equals(group.students);
+        return name.equals(group.getName()) && faculty.equals(group.faculty);
     }
 
     @Override
     public int hashCode() {
-        return 31 * name.hashCode() + students.hashCode();
+        return 31 * name.hashCode() + faculty.hashCode();
     }
 
     @Override
