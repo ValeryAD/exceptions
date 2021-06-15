@@ -3,15 +3,28 @@ package com.github.valeryad;
 import com.github.valeryad.actions.StudentCreator;
 import com.github.valeryad.entities.*;
 import com.github.valeryad.exceptions.*;
-import org.w3c.dom.ls.LSOutput;
 
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 public class Runner {
-    public static final int GRADES_AMOUNT = 5;
+    private static final String EXCEPTION_DEMO_MESSAGE = "Demonstration of catching exception: ";
+    private static final int GRADES_AMOUNT = 5;
+    private static final String MATHEMATICS_FACULTY_NAME = "Faculty of Applied Mathematics and Computer Science";
+    private static final String HISTORY_FACULTY_NAME = "Faculty of History";
+    private static final String LAW_FACULTY_NAME = "Faculty of law";
+    private static final int MAX_GROUP_AMOUNT = 5;
+    private static final int MIN_GROUP_AMOUNT = 2;
+    private static final int MIN_STUDENTS_AMOUNT = 10;
+    private static final int MAX_STUDENTS_AMOUNT = 16;
+    private static final int MIN_ACTUAL_GRADE = 5;
+    private static final String AVERAGE_GRADE_OF_STUDENT_REPORT = "TASK 1:%n" +
+            "Student %s has average grade: %2.2f\n";
+    public static final String AVERAGE_GRADE_IN_SUBJECT_OF_GROUP_OF_FACULTY_REPORT = "TASK 2:%n" +
+            "Average grade in subject \"%s\" of group %s of faculty \"%s\" is %2.2f\n";
+    public static final String AVERAGE_GRADE_IN_SUBJECT_OF_UNIVERSITY_REPORT = "TASK 3:%n" +
+            "Average grade in subject \"%s\" of all university is %2.2f";
+
     private static Random random;
 
     static {
@@ -29,22 +42,23 @@ public class Runner {
 
         countAndPrintAverageGradeOfStudent(university);
         countAndPrintAverageGradeInSubjectOfGroupOfFaculty(university);
+        countAndPrintAverageGradeInSubjectOfUniversity(university);
     }
 
     private static void createFacultiesAndAssignSubjects(University university) {
         try {
             university.getFaculties();
         } catch (NoFacultiesInUniversityException e) {
-            System.err.println(e.getMessage());
+            System.err.println(EXCEPTION_DEMO_MESSAGE + e.getMessage() + "\n");
         }
 
-        Faculty faculty = new Faculty("Faculty of Applied Mathematics and Computer Science");
+        Faculty faculty = new Faculty(MATHEMATICS_FACULTY_NAME);
         faculty.assignSubjects(EnumSet.range(Subjects.MATHEMATICAL_ANALYSIS, Subjects.COMPUTER_NETWORKS));
         university.addFaculty(faculty);
-        faculty = new Faculty("Faculty of History");
+        faculty = new Faculty(HISTORY_FACULTY_NAME);
         faculty.assignSubjects(EnumSet.range(Subjects.FOREIGN_LANGUAGE, Subjects.THEORY_AND_PRACTICE_OF_INTERCULTURAL_COMMUNICATIONS));
         university.addFaculty(faculty);
-        faculty = new Faculty("Faculty of law");
+        faculty = new Faculty(LAW_FACULTY_NAME);
         faculty.assignSubjects(EnumSet.range(Subjects.GENERAL_THEORY_OF_LAW, Subjects.CRIMINOLOGY));
         university.addFaculty(faculty);
     }
@@ -53,12 +67,12 @@ public class Runner {
         try {
             university.getFaculties().get(0).getGroups();
         } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException e) {
-            System.err.println(e.getMessage());
+            System.err.println(EXCEPTION_DEMO_MESSAGE + e.getMessage() + "\n");
         }
 
         try {
             for (Faculty faculty : university.getFaculties()) {
-                for (int i = 0; i < random.nextInt(3) + 2; i++) {
+                for (int i = 0; i < random.nextInt(MAX_GROUP_AMOUNT - MIN_GROUP_AMOUNT) + MIN_GROUP_AMOUNT; i++) {
                     char groupName = 'A';
                     faculty.addGroup(new Group(String.valueOf((char) (groupName + i)), faculty));
                 }
@@ -72,13 +86,14 @@ public class Runner {
         try {
             university.getFaculties().get(0).getGroups().get(0).getStudents();
         } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException | NoStudentsInGroupException e) {
-            System.err.println(e.getMessage());
+            System.err.println(EXCEPTION_DEMO_MESSAGE + e.getMessage() + "\n");
         }
 
         try {
             for (Faculty faculty : university.getFaculties()) {
                 for (Group group : faculty.getGroups()) {
-                    group.addStudents(new StudentCreator().createStudents(random.nextInt(6) + 10));
+                    group.addStudents(new StudentCreator().createStudents(random.
+                            nextInt(MAX_STUDENTS_AMOUNT - MIN_STUDENTS_AMOUNT) + MIN_STUDENTS_AMOUNT));
                 }
             }
         } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException e) {
@@ -91,7 +106,7 @@ public class Runner {
             university.getFaculties().get(0).getGroups().get(0).getStudents().get(0).getSubjects();
         } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException
                 | NoStudentsInGroupException | NoSubjectsExcetption e) {
-            System.err.println(e.getMessage());
+            System.err.println(EXCEPTION_DEMO_MESSAGE + e.getMessage() + "\n");
         }
 
         try {
@@ -117,7 +132,7 @@ public class Runner {
         } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException
                 | NoStudentsInGroupException | NoSubjectsExcetption
                 | IncorrectGradeException e) {
-            System.err.println(e.getMessage());
+            System.err.println(EXCEPTION_DEMO_MESSAGE + e.getMessage() + "\n");
         }
 
 
@@ -139,7 +154,8 @@ public class Runner {
         try {
             for (Subjects subject : student.getSubjects()) {
                 for (int i = 0; i < GRADES_AMOUNT; i++) {
-                    student.giveGrade(subject, random.nextInt(Student.MAX_GRADE-3) + 4);
+                    student.giveGrade(subject,
+                            random.nextInt(Student.MAX_GRADE - MIN_ACTUAL_GRADE + 1) + MIN_ACTUAL_GRADE);
                 }
             }
         } catch (NoSubjectsExcetption | IncorrectGradeException e) {
@@ -148,57 +164,42 @@ public class Runner {
     }
 
     private static void countAndPrintAverageGradeOfStudent(University university) {
-        Student firstStudent = null;
+        Student student = null;
 
         try {
-            firstStudent = university.getFaculties().get(0).getGroups().get(0).getStudents().get(0);
+            student = university.getFaculties().get(0).getGroups().get(0).getStudents().get(0);
         } catch (NoStudentsInGroupException | NoFacultiesInUniversityException | NoGroupsInFacultyException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
+            System.out.printf(AVERAGE_GRADE_OF_STUDENT_REPORT,
+                    student, university.countAverageGradeOfStudent(student));
 
-        System.out.printf("Student %s has average grade: %2.2f\n",
-                firstStudent, university.countAverageGradeOfStudent(firstStudent));
+
     }
 
-    //TODO Check this method
     private static void countAndPrintAverageGradeInSubjectOfGroupOfFaculty(University university) {
         Faculty faculty = null;
         Group group = null;
         Subjects subject = null;
 
-
         try {
             faculty = university.getFaculties().get(0);
             group = faculty.getGroups().get(0);
-            System.out.println(faculty.getGroups().contains(group));
-            Set<Group> set = new HashSet<>(faculty.getGroups());
-            System.out.println(set.contains(group));
+            subject = group.getStudents().get(0).getSubjects().get(0);
 
-            System.out.println("!" + set.equals(faculty.getGroups()));
-            subject = faculty.getSubjects().stream().findAny().get();
-
-            for(Group tempGroup : set){
-                System.out.println(tempGroup);
-            }
-
-            for(Group tempGroup : faculty.getGroups()){
-                System.out.println(tempGroup);
-            }
-
-        } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException | NoSubjectsExcetption e) {
+        } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException |
+                NoSubjectsExcetption | NoStudentsInGroupException e) {
             System.err.println(e.getMessage());
         }
 
-
-        if(faculty.containsGroup(group)){
-            System.out.printf("Average grade in subject \"%s\" of group %s of faculty \"%s\" is %2.2f",
+            System.out.printf(AVERAGE_GRADE_IN_SUBJECT_OF_GROUP_OF_FACULTY_REPORT,
                     subject, group, faculty,
                     university.countAverageGradeInSubjectOfGroup(group, subject));
-        }else{
-            System.out.printf("There's no group %s in faculty \"%s\"\n", group, faculty);
-        }
-
     }
 
-    // todo Make the last method
+    private static void countAndPrintAverageGradeInSubjectOfUniversity(University university){
+        Subjects randomSubject = Subjects.values()[random.nextInt(Subjects.values().length)];
+        System.out.printf(AVERAGE_GRADE_IN_SUBJECT_OF_UNIVERSITY_REPORT,
+                randomSubject, university.countAverageGradeInSubjectOfUniversity(randomSubject));
+    }
 }

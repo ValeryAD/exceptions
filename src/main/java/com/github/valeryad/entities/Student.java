@@ -8,6 +8,9 @@ import java.util.*;
 public class Student {
     public static final int MIN_GRADE = 1;
     public static final int MAX_GRADE = 10;
+    private static final String INCORRECT_GRADE_MESSAGE = "attempt to give incorrect grade (%d) to student %s";
+    private static final String NO_SUBJECTS_MESSAGE = "Student id:%d %s %s doesn't have any subject";
+
     private static int lastId = 0;
     private final int id;
     private String name;
@@ -57,7 +60,7 @@ public class Student {
 
     public void giveGrade(Subjects subject, int grade) throws IncorrectGradeException {
         if (grade < MIN_GRADE || grade > MAX_GRADE) {
-            throw new IncorrectGradeException(String.format("attempt to give incorrect grade: %d to student %s", grade, this));
+            throw new IncorrectGradeException(String.format(INCORRECT_GRADE_MESSAGE, grade, this));
         }
         if (register.containsKey(subject)) {
             register.get(subject).add(grade);
@@ -80,17 +83,16 @@ public class Student {
 
     public List<Subjects> getSubjects() throws NoSubjectsExcetption {
         if (register.isEmpty()) {
-            throw new NoSubjectsExcetption(String.format("Student id:%d %s %s don't have any subject",
-                    id, lastName, name));
+            throw new NoSubjectsExcetption(String.format(NO_SUBJECTS_MESSAGE, id, lastName, name));
         }
 
         return new ArrayList<Subjects>(register.keySet());
     }
 
-    public List<Integer> getGradesOfSubject(Subjects subject){
-        if(register.containsKey(subject)){
+    public List<Integer> getGradesOfSubject(Subjects subject) {
+        if (register.containsKey(subject)) {
             return register.get(subject);
-        }else{
+        } else {
             return new ArrayList<Integer>();
         }
     }

@@ -5,6 +5,8 @@ import com.github.valeryad.exceptions.NoStudentsInGroupException;
 import java.util.*;
 
 public class Group {
+    private static final String NO_STUDENTS_IN_GROUP_MESSAGE = "There's no students in group \"%s\" of %s";
+
     private String name;
     private Faculty faculty;
     private Set<Student> students;
@@ -26,10 +28,12 @@ public class Group {
 
     public void addStudents(Collection<Student> students) {
         this.students.addAll(students);
+        students.stream().forEach(student -> student.setFaculty(faculty));
     }
 
     public void addStudent(Student student) {
         students.add(student);
+        student.setFaculty(faculty);
     }
 
     public boolean isStudentInGroup(Student student) {
@@ -37,10 +41,10 @@ public class Group {
     }
 
     public List<Student> getStudents() throws NoStudentsInGroupException {
-        if(students.size() == 0){
-            throw new NoStudentsInGroupException(String.format("There's no students in group \"%s\" of %s", name, faculty));
+        if (students.size() == 0) {
+            throw new NoStudentsInGroupException(String.format(NO_STUDENTS_IN_GROUP_MESSAGE, name, faculty));
         }
-        return new ArrayList<Student>(students);
+        return new ArrayList<>(students);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class Group {
     }
 
     @Override
-    public String toString(){
-        return "Group \"" + name + "\"";
+    public String toString() {
+        return "\"Group " + name + "\"";
     }
 }

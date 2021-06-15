@@ -1,21 +1,20 @@
 package com.github.valeryad.entities;
 
 import com.github.valeryad.exceptions.NoFacultiesInUniversityException;
+import com.github.valeryad.exceptions.NoGroupsInFacultyException;
 import com.github.valeryad.exceptions.NoStudentsInGroupException;
 import com.github.valeryad.exceptions.NoSubjectsExcetption;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class University {
+    private static final String NO_FACULTIES_MESSAGE = "There's no any faculty in the university";
+
     private static University instance;
     private Set<Faculty> faculties;
 
     private University() {
-        faculties = new HashSet();
+        faculties = new HashSet<>();
     }
 
     public static University getInstance() {
@@ -32,9 +31,9 @@ public class University {
 
     public List<Faculty> getFaculties() throws NoFacultiesInUniversityException {
         if (faculties.size() == 0) {
-            throw new NoFacultiesInUniversityException("There's no any faculty in the university");
+            throw new NoFacultiesInUniversityException(NO_FACULTIES_MESSAGE);
         }
-        return new ArrayList<Faculty>(faculties);
+        return new ArrayList<>(faculties);
     }
 
     public double countAverageGradeOfStudent(Student student) {
@@ -46,24 +45,55 @@ public class University {
                 sum += student.getGradesOfSubject(subject).stream().mapToInt(grade -> grade).sum();
                 gradesAmount += student.getGradesOfSubject(subject).size();
             }
-        } catch (NoSubjectsExcetption noSubjectsExcetption) {
-            noSubjectsExcetption.printStackTrace();
+        } catch (NoSubjectsExcetption e) {
+            System.err.println(e.getMessage());
         }
         return (double) sum / gradesAmount;
     }
 
-    public double countAverageGradeInSubjectOfGroup(Group group, Subjects subject){
+    public double countAverageGradeInSubjectOfGroup(Group group, Subjects subject) {
         List<Student> students = null;
 
-        try{
+        try {
             students = group.getStudents();
-        }catch(NoStudentsInGroupException e){
+        } catch (NoStudentsInGroupException e) {
             System.err.println(e.getMessage());
         }
 
-        return students.stream().map(student -> student.getGradesOfSubject(subject))
+        OptionalDouble optional = students.stream().map(student -> student.getGradesOfSubject(subject))
                 .flatMap(grades -> grades.stream())
                 .mapToInt(grade -> grade)
-                .average().getAsDouble();
+                .average();
+
+        if (optional.isPresent()) {
+            return optional.getAsDouble();
+        }
+
+        return -1;
+    }
+
+    public double countAverageGradeInSubjectOfUniversity(Subjects subject) {
+        List<Double> averageGradesInSubjectOfEachGroup = new LinkedList<>();
+
+        try {
+            for (Faculty faculty : getFaculties()) {
+                for (Group group : faculty.getGroups()) {
+                    averageGradesInSubjectOfEachGroup.add(countAverageGradeInSubjectOfGroup(group, subject));
+                }
+            }
+        } catch (NoFacultiesInUniversityException | NoGroupsInFacultyException e) {
+            System.err.println(e.getMessage());
+        }
+
+        OptionalDouble optional = averageGradesInSubjectOfEachGroup.stream().
+                mapToDouble(averageGrade -> averageGrade).
+                filter(value -> value > 0).
+                average();
+
+        if(optional.isPresent()){
+            return optional.getAsDouble();
+        }
+
+        return -1;
     }
 }

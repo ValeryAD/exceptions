@@ -8,6 +8,9 @@ import java.util.*;
 
 public class Faculty {
 
+    private static final String NO_GROUPS_IN_FACULTY_MESSAGE = "No groups assigned to faculty";
+    private static final String NO_SUBJECTS_MESSAGE = "No subjects assigned to faculty";
+
     private String name;
     private Set<Group> groups;
     private EnumSet<Subjects> subjects;
@@ -17,34 +20,29 @@ public class Faculty {
         groups = new HashSet<>();
     }
 
+    public String getFacultyName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void addGroup(Group group) {
         groups.add(group);
     }
 
     public List<Group> getGroups() throws NoGroupsInFacultyException {
         if (groups.size() == 0) {
-            throw new NoGroupsInFacultyException("No groups assigned to faculty");
+            throw new NoGroupsInFacultyException(NO_GROUPS_IN_FACULTY_MESSAGE);
         }
-        return new ArrayList<Group>(groups);
+        return new ArrayList<>(groups);
     }
 
-    public void addStudent(Group group, Student student) {
-        group.addStudent(student);
-        student.setFaculty(this);
-    }
-
-    public void addStudents(Group group, Collection<Student> students) {
-        group.addStudents(students);
-    }
-
-    public String getFacultyName() {
-        return name;
-    }
-
-    public void assignSubjects(EnumSet<Subjects> subjects){
-        if(this.subjects == null){
+    public void assignSubjects(EnumSet<Subjects> subjects) {
+        if (this.subjects == null) {
             this.subjects = EnumSet.copyOf(subjects);
-        }else{
+        } else {
             this.subjects.addAll(subjects);
         }
     }
@@ -59,7 +57,7 @@ public class Faculty {
 
     public EnumSet<Subjects> getSubjects() throws NoSubjectsExcetption {
         if (subjects == null) {
-            throw new NoSubjectsExcetption("No subjects assigned to faculty");
+            throw new NoSubjectsExcetption(NO_SUBJECTS_MESSAGE);
         }
         return subjects;
     }
@@ -74,33 +72,32 @@ public class Faculty {
             try {
                 students.addAll(group.getStudents());
             } catch (NoStudentsInGroupException e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         }
         return students;
     }
 
     public boolean containsGroup(Group group) {
-        System.out.println("hi");
         return groups.contains(group);
     }
 
     @Override
-    public boolean equals(Object o){
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Faculty faculty = (Faculty) o;
         return name.equals(faculty.name);
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return name.hashCode();
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name;
     }
 }
